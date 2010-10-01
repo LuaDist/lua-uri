@@ -1,0 +1,41 @@
+=head1 Name
+
+lua-uri-urn-issn - ISSN URN support for Lua URI library
+
+=head1 Description
+
+The class C<uri.urn.issn> is used for URNs with the NID 'issn', that is, URIs
+which begin C<urn:issn:>.  It inherits from the L<uri.urn|lua-uri-urn(3)>
+class.
+
+The URI is considered invalid if it doesn't have 8 digits, if there is
+anything extra in the NSS other than the digits and optional single hyphen,
+or if the checksum digit is wrong.
+
+As specified, the check digit is canonicalized to uppercase.  The canonical
+form has a single hyphen in the middle of the digits.
+
+=head1 Methods
+
+All the methods defined in L<lua-uri(3)> and L<lua-uri-urn(3)> as supported, as
+well as the following:
+
+=over
+
+=item uri:issn_digits(...)
+
+Get or set the ISSN value as a string containing just the numbers.  There
+will be no hyphens in this value, and it should be exactly 8 characters long.
+
+If a new value is provided then it must not be nil, and will be validated in
+the normal way, causing an exception if it is invalid.
+
+=back
+
+=head1 References
+
+This implements the 'issn' NID defined in L<RFC 3044>, and is consistent
+with the same NID suggested in L<RFC 2288>.
+
+=for comment
+vi:ts=4 sw=4 expandtab

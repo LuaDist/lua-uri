@@ -1,0 +1,24 @@
+=head1 Name
+
+lua-uri-rtsp - RTSP URI support for Lua URI library
+
+=head1 Description
+
+The classes C<uri.rtsp> and C<uri.rtspu> are used for URIs with the C<rtsp> and
+C<rtspu> schemes respectively.  C<uri.rtsp> inherits from the
+L<uri.http|lua-uri-http(3)> class, and C<uri.rtspu> inherits from C<uri.rtsp>.
+
+There is no special validation or normalization applied to these URIs beyond
+that done for HTTP URIs.
+
+The default port for both schemes S<is 554>.
+
+There are no extra methods defined for telnet URIs, only those described in
+L<lua-uri(3)>.
+
+=head1 References
+
+This class is based on L<RFC 2326 section 3.2>.
+
+=for comment
+vi:ts=4 sw=4 expandtab

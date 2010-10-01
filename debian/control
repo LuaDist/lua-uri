@@ -1,0 +1,27 @@
+Source: lua-uri
+Section: interpreters
+Priority: optional
+Maintainer: Geoff Richards <geoff@laxan.com>
+Build-Depends: cdbs (>= 0.4.23-1.1), debhelper (>= 5), dpatch, lua5.1-policy-dev (>= 8)
+Standards-Version: 3.7.2
+
+Package: liblua5.1-uri
+Architecture: all
+Depends:
+Description: library for manipulating URIs in Lua programs
+ This library allows you to normalize and validate URIs, and provides methods
+ for manipulating them in various ways.
+ .
+ The latest source code and documentation is always available from the
+ module's website: <http://www.daizucms.org/lua/library/uri/>
+
+Package: liblua5.1-uri-dev
+Architecture: all
+Depends: liblua5.1-uri (= ${binary:Version})
+Description: documentation for the Lua URI module
+ This package contains documentation for the liblua5.1-uri package, as a
+ series of man pages.  The main one is lua-uri(3), which describes the
+ general API and gives examples of how to use it.  There are other pages
+ describing the different handling of URIs of certain schemes.
+ A more attractive version of the same thing is available on the module's
+ website: <http://www.daizucms.org/lua/library/uri/doc/>

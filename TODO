@@ -1,0 +1,45 @@
+Perhaps incorporate Mozilla test suite for data: URIs:
+    http://www.mozilla.org/quality/networking/testing/datatests.html
+also validate the mediatype part and normalize it by omitting things which
+will be the same by default.
+
+Check for compliance with latest RFC:
+    http://tools.ietf.org/html/rfc3986
+(uri_encode might use the wrong default for 'patn')
+
+Try to integrate support for IRIs:
+    http://tools.ietf.org/html/rfc3987
+
+Other schemes:
+complete IANA list: http://www.iana.org/assignments/uri-schemes.html
+opaquelocktoken - http://www.rfc-editor.org/rfc/rfc4918.txt (Appendix C)
+svn
+mailto - http://tools.ietf.org/html/rfc2368
+info - http://tools.ietf.org/html/rfc4452
+prospero - http://tools.ietf.org/html/rfc4157
+wais - http://tools.ietf.org/html/rfc4156
+tel - http://tools.ietf.org/html/rfc3966
+sip and sips - http://tools.ietf.org/html/rfc3261
+gopher - http://tools.ietf.org/html/rfc4266
+tag - http://tools.ietf.org/html/rfc4151
+
+new IMAP URI RFC:
+    http://www.rfc-editor.org/rfc/rfc5092.txt
+
+Other NIDs for URNs, some of which are shown here:
+    http://en.wikipedia.org/wiki/Uniform_Resource_Name
+
+Other NIDs which have RFCs:
+    ietf - http://tools.ietf.org/html/rfc2648
+    publicid - http://tools.ietf.org/html/rfc3151
+    uuid - http://tools.ietf.org/html/rfc4122
+    sici - http://tools.ietf.org/html/rfc2288 (not really standardised there, but is there a proper RFC?)
+
+check these CPAN bugs against URI module:
+   mailto encoding: http://rt.cpan.org/Public/Bug/Display.html?id=24934
+   encode: http://rt.cpan.org/Public/Bug/Display.html?id=21640
+
+gopher URI found in the wild, use for testing:
+       <URL:gopher://ftp.cavebear.com/00/pub/Ethernet-codes>
+
+Once again provide the stripping of '<URI:...>' and such like.

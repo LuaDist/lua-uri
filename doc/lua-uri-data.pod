@@ -1,0 +1,67 @@
+=head1 Name
+
+lua-uri-data - data URI support for Lua URI library
+
+=head1 Description
+
+The class C<uri.data> is used for URIs with the C<data> scheme.  It inherits
+from the L<uri|lua-uri(3)> class.
+
+Some of the features of this module require the L<lua-datafilter(3)> library
+to be installed, but URI objects can still be created from C<data> URIs
+even if it isn't available.
+
+Any C<data> URI containing an authority part is considered to be invalid,
+as is one whose path does not contain a comma.  If the URI has the
+C<;base64> parameter, then the data must consist only of characters allowed
+in base64 encoded data (upper and lowercase ASCII letters, digits, and the
+forward slash and plus characters).
+
+=head1 Methods
+
+All the methods defined in L<lua-uri(3)> are supported.  The C<userinfo>,
+C<host>, and C<port> methods will always return nil, and will throw an
+exception when passed anything other than nil.  The C<path> method will throw
+an exception if given a new path which is nil or not valid for the C<data>
+scheme.
+
+The following additional methods are supported:
+
+=over
+
+=item uri:data_bytes(...)
+
+Get or set the data stored in the URI.  The existing data is decoded and
+returned.  If a new value is supplied it must be a string, and will cause
+the path of the URI to be changed to encode the new data.  The method will
+choose the encoding which will result in the smallest URI, unless the
+datafilter module is not installed, in which case it will always use
+percent encoding.
+
+An exception is thrown if the datafilter module is not installed and the data
+in the URI is encoded as base64, although a data URI using percent encoding
+will not cause an exception.
+
+The data passed in and returned should not be encoded in any special way,
+that is taken care of by the library.
+
+=item uri:data_media_type(...)
+
+Get or set the media type (MIME type) stored in the URI's path before the
+comma.  This should not include the C<;base64> parameter, which will be
+included in the path automatically when appropriate.
+
+If there is no media type given in the URI then the default value of
+C<text/plain> will be returned, and if there is no C<charset> parameter
+given then the default C<;charset=US-ASCII> will be included.
+
+The media type is encoded and decoded automatically by this method.
+
+=back
+
+=head1 References
+
+This class is based on L<RFC 2397>.
+
+=for comment
+vi:ts=4 sw=4 expandtab
