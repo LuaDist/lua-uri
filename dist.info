@@ -3,7 +3,7 @@
 name = "lua-uri"
 version = "1.0"
 
-deps = "Lua module for manipulating URIs"
+desc = "Lua module for manipulating URIs"
 author = "Geoff Richards"
 license = "MIT/X Consortium"
 url = "http://www.daizucms.org/lua/library/uri"
