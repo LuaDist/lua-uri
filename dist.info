@@ -1,6 +1,6 @@
 --- This file is part of LuaDist project
 
-name = "lua_uri"
+name = "lua-uri"
 version = "1.0"
 
 deps = "Lua module for manipulating URIs"

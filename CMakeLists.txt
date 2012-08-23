@@ -1,17 +1,17 @@
-# Copyright (C) 2007-2009 LuaDist.
+# Copyright (C) 2007-2012 LuaDist.
 # Created by Peter Kapec
 # Redistribution and use of this file is allowed according to the terms of the MIT license.
 # For details see the COPYRIGHT file distributed with LuaDist.
 # Please note that the package source code is licensed under its own license.
 
-PROJECT(uri NONE)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-INCLUDE(dist.cmake)
+project ( lua-uri NONE )
+cmake_minimum_required ( VERSION 2.8 )
+include ( cmake/dist.cmake )
+include ( lua )
 
 # Install all files and documentation
-INSTALL (FILES uri.lua DESTINATION ${INSTALL_LMOD})
-INSTALL (DIRECTORY uri DESTINATION ${INSTALL_LMOD})
-INSTALL (FILES COPYRIGHT Changes README TODO DESTINATION ${INSTALL_DATA})
-INSTALL (DIRECTORY doc/ DESTINATION ${INSTALL_DOC})
-INSTALL (DIRECTORY test/ DESTINATION ${INSTALL_TEST})
-INSTALL (FILES lunit.lua uri-test.lua DESTINATION ${INSTALL_FOO})
+install_lua_module ( uri uri.lua )
+install ( DIRECTORY uri DESTINATION ${INSTALL_LMOD} COMPONENT Runtime )
+install_data ( COPYRIGHT Changes README TODO )
+install_doc ( doc/ )
+install_test ( test/ uri-test.lua )
