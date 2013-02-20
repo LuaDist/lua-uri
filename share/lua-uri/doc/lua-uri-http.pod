@@ -1,0 +1,28 @@
+=head1 Name
+
+lua-uri-http - HTTP URI support for Lua URI library
+
+=head1 Description
+
+The classes C<uri.http> and C<uri.https> are used for URIs with the C<http> and
+C<https> schemes respectively.  C<uri.http> inherits from the generic
+L<uri|lua-uri(3)> class, and C<uri.https> inherits from C<uri.http>.
+
+An HTTP or HTTPS URI containing any userinfo part is considered to be
+invalid.  An empty path is normalized to '/', since browsers usually do
+that, and an empty path cannot be used in an HTTP GET request.
+
+The default port for the C<http> scheme S<is 80>, and for C<https>
+S<is 443>.
+
+There are no extra methods defined for telnet URIs, only those described in
+L<lua-uri(3)>.
+
+=head1 References
+
+As far as I can tell there is no up to date specification of the syntax of
+HTTP URIs, so this class is based on L<RFC 1738 section 3.3> and
+L<RFC 2616 section 3.2.2>.
+
+=for comment
+vi:ts=4 sw=4 expandtab

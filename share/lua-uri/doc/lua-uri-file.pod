@@ -1,0 +1,137 @@
+=head1 Name
+
+lua-uri-file - File URI support for Lua URI library
+
+=head1 Description
+
+The class C<uri.file> is used for URIs with the C<file> scheme.  It inherits
+from the L<uri|lua-uri(3)> class.
+
+A file URI without an authority doesn't have a well defined meaning.  This
+library considers such URIs to be invalid when they have a path which does not
+start with '/' (for example C<file:foo/bar>).  It is likely that any such URI
+should really be a relative URI reference.  If the path does start with a slash
+then this library will attempt to 'repair' the URI by adding an empty authority
+part, so that C<file:/foo/bar> will be changed automatically to
+C<file:///foo/bar>.
+
+A host value of C<localhost> is normalized to an empty host, so that
+C<file://localhost/foo> will become C<file:///foo>.  An empty path is
+normalized to '/'.
+
+The path part is always considered to be case sensitive, so no case folding
+is done even when converting to a filesystem path for Windows.
+
+Query parts and fragments are left alone by this library, but are not used
+in converting URIs to filesystem paths.
+
+=head1 Converting between URIs and filesystem paths
+
+A C<uri.file> object can be converted into an absolute path suitable for
+use on a particular operating system by calling the C<filesystem_path>
+method:
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("file:///foo/bar"))
+    print(uri:filesystem_path("unix"))  -- /foo/bar
+    print(uri:filesystem_path("win32")) -- \foo\bar
+
+This method will throw an exception if the path cannot be converted.
+For example, a file URI containing a host name cannot be represented on
+a Unix filesystem, but on a Win32 system it will be converted to a UNC path:
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("file://server/path"))
+    print(uri:filesystem_path("unix"))  -- error
+    print(uri:filesystem_path("win32")) -- \\server\path
+
+To convert a filesystem path into a URI, call the class method
+C<make_file_uri>:
+
+=for syntax-highlight lua
+
+    local FileURI = require "uri.file"
+    local uri = FileURI.make_file_uri("/foo/bar", "unix")
+    print(uri)      -- file:///foo/bar
+    uri = FileURI.make_file_uri("C:\foo\bar", "win32")
+    print(uri)      -- file:///C:/foo/bar
+
+To convert a relative URI reference (a L<uri._relative|lua-uri-_relative(3)>
+object) into a filesystem path you should first resolve it against an
+appropriate C<file> URI, and then call the C<filesystem_path> method on that.
+
+=head1 Methods
+
+All the methods defined in L<lua-uri(3)> are supported.  The C<userinfo>,
+and C<port> methods will always return nil, and will throw an
+exception when passed anything other than nil.  The C<host> method will
+normalize C<localhost> to an empty host name, and will throw an exception if
+given a new value of nil.  The C<path> method will normalize an empty path
+or nil value to '/'.
+
+In addition to the standard methods, file URIs support the C<filesystem_path>
+method, and the C<uri.file> class contains the C<make_file_uri> function,
+both of which are described above.
+
+=head1 Operating systems supported
+
+The conversion between a file URI and a path suitable for use on a particular
+operating system are defined in additional classes, which are loaded
+automatically based on the operating system name supplied to the two conversion
+functions.  For example, passing the string C<win32> to the functions will
+invoke the implementation in the class C<uri.file.win32>.  An exception will be
+thrown if no class exists to support a given operating system.  The following
+operating system classes are provided:
+
+=over
+
+=item C<uri.file.unix>
+
+A URI containing a host name will cause an exception to be thrown, as there
+is no obvious way for these to be represented in Unix paths.  If the path
+contains an encoded null byte (C<%00>) or encoded slash (C<%2F>) then an
+exception will be thrown.
+
+Attempting to convert a relative path to a URI will cause an exception.
+
+=item C<uri.file.win32>
+
+Forward slashes ('/') in URIs will be converted to backslashes ('\') in
+paths, and vice versa.
+
+URIs containing host names will be converted to UNC paths, starting with
+a '\\' followed by the hostname and then the path part.  If the path part
+of a URI appears to begin with a drive letter, then the first slash will
+be removed so that the resulting path starts with the letter.  Encoded
+pipe characters ('%7C') will be recognized as equivalent to colons for the
+purpose of identifying drive letters, since they have been historically
+used in that way, but I believe they are not allowed to occur in the path
+unencoded in a URI nowadays.
+
+=back
+
+The operating system names are case insensitive, and are folded to lowercase
+before being converted into a Lua module name.
+
+Currently there is no way for this library to recognise the operating system it
+is running on, since Lua has no built-in way of providing that information.
+
+=head1 References
+
+The most up to date IETF standard for the C<file> URI scheme is still
+L<RFC 1738 section 3.10>, but this does not specify exactly how to convert
+between URIs and filesystem paths on particular platforms.  It does however
+specify the equivalence between 'localhost' and an empty host.
+
+The correct form of file URI to represent a Windows filesystem path is
+described in a blog article:
+L<http://blogs.msdn.com/ie/archive/2006/12/06/file-uris-in-windows.aspx>
+
+There is a standard of sorts describing the conversion between Unix paths
+and file URIs:
+L<http://equinox-project.org/spec/file-uri-spec.txt>
+
+=for comment
+vi:ts=4 sw=4 expandtab

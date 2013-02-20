@@ -1,0 +1,463 @@
+=head1 Name
+
+lua-uri - Lua module for manipulating URIs
+
+=head1 Loading the module
+
+The URI module doesn't alter any global variables when it loads, so you can
+decide what name you want to use to access it.  You will probably want to
+load it like this:
+
+=for syntax-highlight lua
+
+    local URI = require "uri"
+
+You can use a variable called something other than C<URI> if you'd like,
+or you could assign the table returned by C<require> to a global variable.
+In this documentation we'll assume your using a variable called C<URI>.
+
+=head1 Parsing, validating and normalizing URIs
+
+When you create a URI object, the string you supply is checked to make sure
+it conforms to the appropriate standards.
+If everything is OK, the new object will be returned, otherwise nil
+and an error message will be returned.  You can convert any errors into
+Lua exceptions using the C<assert> function.
+
+=for syntax-highlight lua
+
+    local URI = require "URI"
+
+    local uri = assert(URI:new("http://example.com/foo"))
+
+    -- In this case, these will print the original string.
+    -- They are both the same.
+    print(tostring(uri))
+    print(uri:uri())
+
+You can extract individual parts of the URI with various accessor methods:
+
+=for syntax-highlight lua
+
+    print(uri:scheme())     -- http
+    print(uri:host())       -- example.com
+    print(uri:path())       -- /foo
+
+Some URIs will be 'normalized' automatically to produce an equivalent
+canonical version.  Nothing will be changed which would affect how the
+URI will be interpreted.  For example:
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("HTTP://EXAMPLE.COM:80/FOO"))
+    print(tostring(uri))     -- http://example.com/FOO
+
+In this case the scheme and hostname were both converted to lowercase
+(but not the path part, because that's case sensitive).  The port number
+was also removed because S<port 80> is the default anyway for HTTP URIs.
+
+If you just want to make sure a URI is correct, but without throwing an
+exception, use code like this:
+
+=for syntax-highlight lua
+
+    local uri, err = URI:new(uri_to_test)
+
+    if uri then
+        print("valid, normalized to " .. tostring(uri))
+    else
+        print("invalid, error message is " .. err)
+    end
+
+(Note that many invalid URIs will get processed as relative URI references,
+so if you're expecting an absolute URI it's also a good idea to check that
+the C<is_relative> method returns false.)
+
+=head1 Cloning URIs
+
+To make a copy of a URI object, pass it to the constructor:
+
+=for syntax-highlight lua
+
+    local original = URI:new("http://www/foo")
+    local copy = URI:new(original)
+
+The two objects will contain the same information, but can be changed
+independently.
+
+=head1 Relative URIs
+
+A relative URI reference is not a complete URI.  It doesn't have a scheme,
+so it doesn't really mean anything until it is resolved against an absolute
+URI.  For this reason, when you create a URI object from a relative URI,
+it will belong to the special class C<uri._relative>.  There is very little
+you can do with a relative URI object other than get and set its path, query
+string, and fragment identifier.
+
+Relative URI objects can be created in the same way as absolute ones:
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("../path?query#fragment"))
+    print(uri:is_relative())    -- true
+    print(uri._NAME)            -- uri._relative
+
+There are two ways to resolve a relative URI reference against an absolute
+URI to get another absolute URI.  One is to create a new URI object, passing
+the base URI as a second argument to the constructor:
+
+=for syntax-highlight lua
+
+    local rel  = assert(URI:new("../quux.html"))
+    local base = assert(URI:new("http://example.com/foo/bar/"))
+    local abs  = assert(URI:new(rel, base))
+    print(tostring(abs))    -- http://example.com/foo/quux.html
+
+You can also do this by passing strings to C<new>, instead of objects:
+
+=for syntax-highlight lua
+
+    local abs = assert(URI:new("../quux.html",
+                               "http://example.com/foo/bar/"))
+    print(tostring(abs))    -- http://example.com/foo/quux.html
+
+Alternatively, a URI object containing a relative URI can be made absolute
+without creating a new object using the C<resolve> method:
+
+=for syntax-highlight lua
+
+    local uri  = assert(URI:new("../quux.html"))
+    local base = assert(URI:new("http://example.com/foo/bar/"))
+    uri:resolve(base)
+    print(tostring(uri))    -- http://example.com/foo/quux.html
+
+The reverse process can be carried out with the C<relativize> method,
+creating a relative URI from an absolute one, where the relative URI
+can be later resolved against a particular base URI:
+
+=for syntax-highlight lua
+
+    local uri  = assert(URI:new("http://example.com/foo/quux.html"))
+    local base = assert(URI:new("http://example.com/foo/bar/"))
+    uri:relativize(base)
+    print(tostring(uri))    -- ../quux.html
+
+It is possible for a relative URI to have an authority part, although this
+is very rare in practice.  It is unlikely that you'll ever need to do this,
+but you can create a URI like this:
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("//example.com/path"))
+
+=head1 Methods
+
+This is a complete list of the methods you can call on a generic C<URI>
+object once created by calling C<new>.  Some URIs are created in more
+specific classes (listed in the L</URI schemes> section), which may have
+additional methods.  Arguments shown in square brackets below are optional.
+
+Note that all the accessor methods, like C<path> and C<uri>, can be used just
+to return the current value (if they are called without an argument), or can
+set a new value while returning the old value.  Passing nil as the argument is
+generally different from not passing an argument at all, or to passing an
+empty string.
+
+=over
+
+=item uri:default_port()
+
+Returns the default port used for this type of URI when no port number is
+supplied in the authority part.  This will be nil if the standard for the
+URI's current scheme doesn't specify a default port, or if the scheme is
+one which this library doesn't have any special understanding of.
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("http://example.com:123/"))
+    print(uri:default_port())   -- 80
+
+=item uri:eq(other)
+
+Returns true if the two URI objects contain the same URI.  C<other> can also
+be a string, which will be converted to a URI object (in order for the
+normalization to be done).
+
+This can also be called as a stand-alone function if you don't know whether
+either URI is an object or a string.  For example:
+
+=for syntax-highlight lua
+
+    print(URI.eq("http://example.com",
+                 "HTTP://EXAMPLE.COM/"))
+
+If either value is a string which isn't a valid URI, this will throw an
+exception.  It will however accept relative URIs, and they will be compared
+as normal.  A relative URI is never equal to an absolute one.
+
+There is no less-than comparison function, as URIs don't have any particular
+ordering.  If you want to sort URI objects you're best bet is probably just
+to compare the string versions:
+
+=for syntax-highlight lua
+
+    function urisort (a, b)
+        return a:uri() < b:uri()
+    end
+
+    table.sort(t, urisort)
+
+=item uri:fragment([newvalue])
+
+Returns the current fragment part of the URI (the part after the C<#>
+character), or nil if the URI has no fragment part.  Note that an empty
+fragment (zero characters long) is different from one which is completely
+missing.
+
+If C<newvalue> is supplied, changes the fragment to the new value, percent
+encoding any characters which would not be valid in a fragment part.  Any
+percent encoding already done on the string will be left in place (not double
+encoded).  If C<newvalue> is nil then any existing fragment will be removed.
+
+The syntax of fragments are meaningful only for particular media types
+of resources, so there is no special behaviour for different URI schemes.
+
+=item uri:host([newvalue])
+
+Get and set the host part of the authority in a URI.  This can be a domain
+name, an IPv4 address (four numbers separated by dots), or an IPv6 address
+(which must include the enclosing square brackets used in URIs).
+
+When setting a new host, the value is normalized to lowercase.  An invalid
+value will cause an exception to be thrown.  The value can be an empty string
+to indicate the default host.
+
+Setting the value to nil will cause the host to be removed altogether,
+leaving the URI with no authority component.  This will throw an exception
+if there is a userinfo or port component in the URI, because it is impossible
+to represent a URI with no host when there is an authority component.
+
+Some URI schemes may throw an exception when setting the host to nil or the
+empty string, and others when setting it to anything other than nil, if those
+schemes require or disallow authority components.
+
+=item uri:init()
+
+This method is called internally to make a URI object belong to the right
+class and do any scheme-specific validation an normalization.  It is only
+of interest if you want to write a new C<uri> subclass for particular types
+of URIs.
+
+The implementation in the C<uri> class itself changes the class of the object
+to the one appropriate to the scheme (if there is a more specific class
+available).  It also removes the port number from the authority component if
+it is unnecessary because the scheme defines it as the default port.  Finally,
+if there is a more specific class available it calls the C<init> method in
+that.
+
+C<init> is called after the URI has been split into components according to
+the generic syntax, so it can use the accessor methods to get at them.
+It should return the same values as C<new>, either the new URI object (the
+object it was called on), or nil and an error message.
+
+=item uri:is_relative()
+
+Returns true if this is a relative URI reference, false otherwise.  All
+relative URIs belong to the class C<uri._relative>.  All the other URI
+classes are for absolute URIs.
+
+=item uri:path([newvalue])
+
+Get or set the path component of the URI.  Throws an exception if the new
+value is not valid in the context of the rest of the URI.
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("http://example.com/foo"))
+    local old = uri:path("/bar/")
+    print(old)          -- /foo
+    print(uri:path())   -- /bar/
+
+When a new path value is supplied, it can already be percent encoded, but
+any characters which aren't allowed are encoded as well.  Percent characters
+are not encoded themselves, because they are assumed to be part of the existing
+encoding.  The existing percent encoding is normalized, and any invalid
+encoding will cause an exception.
+
+There are certain paths which cannot be expressed in the URI syntax.  A path
+which does not start with a C</> character (unless it's completely empty)
+cannot be represented when there is an authority component, so this will
+cause an exception to be thrown.  A path which starts with C<//> when there
+is no authority component would be misinterpreted, so the second slash is
+percent encoded.
+
+Some URI schemes may impose further restrictions on what is allowed in a
+path, so other path values may cause exceptions in certain cases.
+
+=item uri:port([newvalue])
+
+Get or set the port number in a URI.  The value returned is always an
+integer number or nil.
+
+If C<newvalue> is supplied it should be a non-negative integer number, or
+a string containing only digits, or nil to remove any existing port number.
+An exception is thrown if it is an invalid value, or if the URI scheme
+doesn't allow port numbers to be specified.  If there is currently no
+authority part in the URI, then an empty host will be added to create one.
+
+If the port number is the default for a URI scheme (the same as the number
+returned from the C<default_port> method), then the C<port> method will
+return that number, but the number won't actually be shown in the URI when
+it is represented as a string, because it would be redundant.  Setting the
+port number to nil has the same effect as setting it to the default port
+number.
+
+=item uri:query([newvalue])
+
+Get or set the query part of a URI.
+
+If C<newvalue> is supplied it should be the new string, or nil to remove
+any existing query part.  The query part can be an empty string, which is
+different from it not being present at all (the C<?> character will still
+be included to indicate that there is a query part, even if it is not
+followed by anything else).  Any characters which would not be valid in
+a query part will be percent encoded, but any percent encoding already done
+on the string will be left in place (not double encoded).
+
+The base-class implementation of this method never throws exceptions, but
+some scheme-specific classes may throw exceptions if they impose constraints
+on the syntax of query parts.
+
+=item uri:resolve(base)
+
+Given an object representing a relative URI, resolve it against the base
+URI C<base> (which can be a URI object or string) and update the C<uri>
+object to contain an absolute URI.
+
+Has no effect if C<uri> is already an absolute URI.  Throws an exception
+if C<base> is not an absolute URI, or if the new URI formed by combining
+them would be invalid for the given scheme.
+
+See also the section L</Relative URIs> and the C<uri:relativize(base)> method.
+
+=item uri:scheme([newvalue])
+
+Get and set the scheme of the URI.  Altering the scheme of an existing URI
+is very unlikely to be useful.
+
+Throws an exception if C<newvalue> is nil or not a valid scheme, or if the
+rest of the URI is not valid when interpreted with the new scheme.
+After calling this method the class of the object may have been changed,
+if the old class is not appropriate for the new value.
+
+=item uri:relativize(base)
+
+If possible, update the absolute URI C<uri> to contain a relative URI
+which, when resolved again against C<base>, will yield the original URI
+value.  This doesn't return anything, just modifies the object.
+
+Has no effect if C<uri> is already relative, or if there is no way to create
+an appropriate relative URI (so the URI will remain absolute for example if
+C<base> has a different scheme from C<uri>).  Throws an exception if C<base>
+is not absolute.
+
+This method will never result in a network-path reference (a relative URI
+which includes an authority part).  In cases where that would be possible
+the value in C<uri> will be left as an absolute URI, which is less likely
+to cause problems.
+
+See also the section L</Relative URIs> and the C<uri:resolve(base)> method.
+
+=item uri:uri([newvalue])
+
+Returns the URI value as a string.  The return value is the same as you'll
+get from C<tostring(uri)>.
+
+If an argument is supplied, this replaces the URI in the C<uri> object with
+a different one.  C<newvalue> must be a complete new URI or relative URI
+reference in a string, or a URI object.
+
+This is equivalent to creating a new URI object by calling C<URI:new>,
+except that instead of creating a new object the existing object is updated
+with the new information.  It is also not possible to pass a base URI to
+the C<uri> method.
+
+Throws an exception if C<newvalue> is nil or if there is any error in parsing
+the new URI string.  After calling this method the class of the object may
+have been changed, if the old class is not appropriate for the new value.
+
+=item uri:userinfo([newvalue])
+
+Get or set the userinfo part of the URI.  If C<newvalue> is supplied then
+it is expected to be percent encoded already.  Percent encoding is normalized.
+An exception will be thrown if the new value is invalid, or if the URI scheme
+does not allow a userinfo part (for example if it is an HTTP URI).  If there
+is currently no authority part in the URI, then an empty host will be added
+to create one.
+
+If C<newvalue> is nil then any existing userinfo part is removed.
+
+=back
+
+=head1 URI schemes
+
+The following Lua modules provide classes which implement extra validation
+and normalization, or provide extra methods, for URIs which specific schemes:
+
+=over
+
+=item L<uri.data|lua-uri-data(3)>
+
+=item L<uri.file|lua-uri-file(3)>
+
+=item L<uri.ftp|lua-uri-ftp(3)>
+
+=item L<uri.http|lua-uri-http(3)> and uri.https
+
+=item L<uri.pop|lua-uri-pop(3)>
+
+=item L<uri.rtsp|lua-uri-rtsp(3)> and uri.rtspu
+
+=item L<uri.telnet|lua-uri-telnet(3)>
+
+=item L<uri.urn|lua-uri-urn(3)>
+
+=back
+
+=head1 Other modules
+
+Other Lua modules provide additional functionality used in the library,
+or act as base classes for the scheme-specific classes:
+
+=over
+
+=item L<uri._login|lua-uri-_login(3)>
+
+Baseclass for URI schemes which use a username and password in their userinfo
+part, separated by a colon (for example FTP).
+
+=item L<uri._util|lua-uri-_util(3)>
+
+Utility functions used by the rest of the library.  Contains useful
+C<uri_encode> and C<uri_decode> functions which might be useful elsewhere.
+
+=back
+
+=head1 References
+
+The parsing of URI syntax is based primarily on L<RFC 3986>.
+
+=head1 Copyright
+
+This software and documentation is Copyright E<copy> 2007 Geoff Richards
+E<lt>geoff@laxan.comE<gt>.  It is free software; you can redistribute it
+and/or modify it under the terms of the S<Lua 5.0> license.  The full terms
+are given in the file F<COPYRIGHT> supplied with the source code package,
+and are also available here: L<http://www.lua.org/license.html>
+
+An older unreleased version of this library was created as a direct port
+of the Perl URI library, by Gisle Aas and others.  It has since been
+rewritten with a somewhat different design.
+
+=for comment
+vi:ts=4 sw=4 expandtab

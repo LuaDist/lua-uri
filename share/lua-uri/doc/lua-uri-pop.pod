@@ -1,0 +1,63 @@
+=head1 Name
+
+lua-uri-pop - POP URI support for Lua URI library
+
+=head1 Description
+
+The class C<uri.pop> is used for URIs with the C<pop> scheme.  It inherits
+from the L<uri|lua-uri(3)> class.
+
+POP URIs with a non-empty path part are considered invalid.  There are also
+invalid if there is a userinfo part which has an empty POP username or an
+empty POP 'auth' type.
+
+The ';auth=' part of a POP URI is normalized so that the word 'auth' is in
+lowercase, and if the auth type is the default '*' value then it is removed
+altogether, leaving just the username.
+
+The default port S<is 110>.
+
+=head1 Methods
+
+All the methods defined in L<lua-uri(3)> are supported.  The C<userinfo>
+method will throw an exception if the new userinfo would form an invalid
+POP URI, and will normalize the auth type part if appropriate.  The C<path>
+method will always return empty strings for POP URIs, and will throw an
+exception if given a new value which is not the empty string.
+
+The following additional methods are provided:
+
+=over
+
+=item uri:pop_user(...)
+
+Get or set the POP username, which is stored in the userinfo part of the
+authority.
+
+The return value will be nil if there is no user information in the URI,
+or a fully decoded string if there is.
+
+If the new value is empty, and exception is thrown.  The user can be set to
+nil to remove the userinfo part from the URI, but this will also throw an
+exception if there is an 'auth' type specified.
+
+=item uri:pop_auth(...)
+
+Get or set the POP authentication type, which is stored in the userinfo
+part of the authority after the string ';auth='.
+
+The value returned is just the auth type, not the ';auth=' part, and will be
+fully decoded.  The value returned will never be nil.  If there is no auth type
+specified then the default value of '*' will be returned.
+
+Setting a new value of nil or the empty string will cause an exception
+to be thrown.
+
+=back
+
+=head1 References
+
+This class is based on L<RFC 2384>.
+
+=for comment
+vi:ts=4 sw=4 expandtab
