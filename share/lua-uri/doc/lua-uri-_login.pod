@@ -1,0 +1,68 @@
+=head1 Name
+
+lua-uri-_login - Lua URI library support for URIs containing usernames and passwords
+
+=head1 Description
+
+The C<uri._login> class is used as a base class by classes implementing URI
+schemes which can have a username and password in the userinfo part, separated
+by a colon.
+
+A URI of this type where the userinfo part contains more than one colon
+is considered invalid.  They must also have a non-empty host part.  The
+username and password are each optional.
+
+The current implementation requires subclasses to call this class's
+C<init_base> method within their C<init> method to do the extra validation.
+This may change if I think of a better way of doing it.
+
+=head1 Methods
+
+All the methods defined in L<lua-uri(3)> are supported, in addition to the
+following:
+
+=over
+
+=item uri:username(...)
+
+Mutator for the username in the userinfo part.  Returns an optionally sets
+the first part of the userinfo, before the colon.  If there is no password
+then the username will be the whole of the userinfo part, and no colon will
+be present.
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("ftp://host/path"))
+    uri:username("fred")    -- ftp://fred@host/path
+    uri:username(nil)       -- ftp://host/path
+
+Passing nil as the new username will also remove any password in the userinfo,
+since the password is expected to be meaningless without the username.
+
+The username is appropriately percent encoded and decoded by this method.
+
+=item uri:password(...)
+
+Mutator for the password part of the userinfo.  This will appear after a
+colon, whether or not there is a username.
+
+The password is appropriately percent encoded and decoded by this method.
+
+=for syntax-highlight lua
+
+    local password = uri:password()
+    uri:password("secret")
+
+=back
+
+=head1 References
+
+The main RFC for URIs (L<RFC 3986>) does not specify a syntax for the
+userinfo part of the authority, which is why the C<username> and C<password>
+methods are not provided in the generic C<uri> class.  The use of the colon
+to separate these parts, and the escaping conventions, are instead derived
+from the older L<RFC 1738 section 3.1>, and the up to date telnet URI
+specification in L<RFC 4248>.
+
+=for comment
+vi:ts=4 sw=4 expandtab

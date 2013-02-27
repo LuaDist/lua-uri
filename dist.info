@@ -1,0 +1,96 @@
+type = "x86_64"
+arch = "Ubuntu"
+author = "Geoff Richards"
+depends = {
+[[lua ~> 5.1]],
+}
+
+desc = "Lua module for manipulating URIs"
+version = "1.0"
+maintainer = "Peter Kapec"
+files = {
+Runtime = {
+[[lib/lua/uri.lua]],
+[[lib/lua/uri/file/win32.lua]],
+[[lib/lua/uri/file/unix.lua]],
+[[lib/lua/uri/_login.lua]],
+[[lib/lua/uri/data.lua]],
+[[lib/lua/uri/_relative.lua]],
+[[lib/lua/uri/https.lua]],
+[[lib/lua/uri/urn.lua]],
+[[lib/lua/uri/rtsp.lua]],
+[[lib/lua/uri/file.lua]],
+[[lib/lua/uri/_util.lua]],
+[[lib/lua/uri/ftp.lua]],
+[[lib/lua/uri/pop.lua]],
+[[lib/lua/uri/rtspu.lua]],
+[[lib/lua/uri/telnet.lua]],
+[[lib/lua/uri/urn/isbn.lua]],
+[[lib/lua/uri/urn/issn.lua]],
+[[lib/lua/uri/urn/oid.lua]],
+[[lib/lua/uri/http.lua]],
+}
+,
+Documentation = {
+[[share/lua-uri/doc//lua-uri-urn.3]],
+[[share/lua-uri/doc//lua-uri-ftp.pod]],
+[[share/lua-uri/doc//lua-uri-http.3]],
+[[share/lua-uri/doc//lua-uri-pop.3]],
+[[share/lua-uri/doc//lua-uri-data.pod]],
+[[share/lua-uri/doc//lua-uri-urn-issn.pod]],
+[[share/lua-uri/doc//lua-uri-urn-isbn.3]],
+[[share/lua-uri/doc//lua-uri-urn-issn.3]],
+[[share/lua-uri/doc//lua-uri-urn-oid.pod]],
+[[share/lua-uri/doc//lua-uri-rtsp.3]],
+[[share/lua-uri/doc//lua-uri-_util.3]],
+[[share/lua-uri/doc//lua-uri.pod]],
+[[share/lua-uri/doc//lua-uri-pop.pod]],
+[[share/lua-uri/doc//lua-uri-urn-isbn.pod]],
+[[share/lua-uri/doc//lua-uri-ftp.3]],
+[[share/lua-uri/doc//lua-uri.3]],
+[[share/lua-uri/doc//lua-uri-_util.pod]],
+[[share/lua-uri/doc//lua-uri-telnet.pod]],
+[[share/lua-uri/doc//lua-uri-http.pod]],
+[[share/lua-uri/doc//lua-uri-file.3]],
+[[share/lua-uri/doc//lua-uri-file.pod]],
+[[share/lua-uri/doc//lua-uri-_login.pod]],
+[[share/lua-uri/doc//lua-uri-urn.pod]],
+[[share/lua-uri/doc//lua-uri-_login.3]],
+[[share/lua-uri/doc//lua-uri-urn-oid.3]],
+[[share/lua-uri/doc//lua-uri-data.3]],
+[[share/lua-uri/doc//lua-uri-telnet.3]],
+[[share/lua-uri/doc//lua-uri-rtsp.pod]],
+}
+,
+Data = {
+[[share/lua-uri/COPYRIGHT]],
+[[share/lua-uri/Changes]],
+[[share/lua-uri/README]],
+[[share/lua-uri/TODO]],
+}
+,
+Test = {
+[[share/lua-uri/test//_resolve.lua]],
+[[share/lua-uri/test//data.lua]],
+[[share/lua-uri/test//_relative.lua]],
+[[share/lua-uri/test//urn-isbn.lua]],
+[[share/lua-uri/test//urn-issn.lua]],
+[[share/lua-uri/test//urn.lua]],
+[[share/lua-uri/test//rtsp.lua]],
+[[share/lua-uri/test//file.lua]],
+[[share/lua-uri/test//_util.lua]],
+[[share/lua-uri/test//ftp.lua]],
+[[share/lua-uri/test//pop.lua]],
+[[share/lua-uri/test//telnet.lua]],
+[[share/lua-uri/test//urn-oid.lua]],
+[[share/lua-uri/test//_generic.lua]],
+[[share/lua-uri/test//_pristine.lua]],
+[[share/lua-uri/test//http.lua]],
+[[share/lua-uri/test/uri-test.lua]],
+}
+,
+}
+
+license = "MIT/X Consortium"
+name = "lua-uri"
+url = "http://www.daizucms.org/lua/library/uri"

@@ -1,0 +1,52 @@
+=head1 Name
+
+lua-uri-urn-isbn - ISBN URN support for Lua URI library
+
+=head1 Description
+
+The class C<uri.urn.isbn> is used for URNs with the NID 'isbn', that is, URIs
+which begin C<urn:isbn:>.  It inherits from the L<uri.urn|lua-uri-urn(3)>
+class.
+
+Some of the functionality of this class depends on the L<lua-isbn(3)> module
+being installed, although it can be used without that.  In particular, if the
+module is installed then full checksum validation of the ISBN is performed,
+whereas without it the ISBN is only checked for invalid characters.  The ISBN
+value is normalized to include hyphens in the conventional places if the
+lua-isbn module is installed (the exact hyphen positions depend on the number),
+but without it all hyphens are removed instead.  If the ISBN ends in a checksum
+of 'x', then it folded to uppercase.
+
+=head1 Methods
+
+All the methods defined in L<lua-uri(3)> and L<lua-uri-urn(3)> are supported,
+as well as the following:
+
+=over
+
+=item uri:isbn(...)
+
+Get or set the ISBN value as an object of the type provided by the C<isbn>
+class in the L<lua-isbn(3)> library.  This method will throw an exception
+if this library is not installed, or if the object supplied is not a valid
+ISBN object (it will currently accept a string, but you shouldn't rely on
+this).
+
+=item uri:isbn_digits(...)
+
+Get or set the ISBN value as a string containing just the numbers (and
+possibly an 'X' as the last digit).  There will be no hyphens in this value,
+and it should be exactly 10 or 13 characters long.
+
+If a new value is provided then it must not be nil, and will be validated in
+the normal way, causing an exception if it is invalid.
+
+=back
+
+=head1 References
+
+This implements the 'isbn' NID defined in L<RFC 3187>, and is consistent
+with the same NID suggested in L<RFC 2288>.
+
+=for comment
+vi:ts=4 sw=4 expandtab

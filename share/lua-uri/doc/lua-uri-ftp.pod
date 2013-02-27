@@ -1,0 +1,45 @@
+=head1 Name
+
+lua-uri-ftp - FTP URI support for Lua URI library
+
+=head1 Description
+
+The class C<uri.ftp> is used for URIs with the C<ftp> scheme.  It inherits from
+the L<uri._login|lua-uri-_login(3)> class.
+
+FTP URIs with a missing authority part or an empty host part are considered
+to be invalid.  An empty path is always normalized to '/'.  The default port
+S<is 21>.
+
+=head1 Methods
+
+All the methods defined in L<lua-uri(3)> and L<lua-uri-_login(3)> are
+supported, in addition to the following:
+
+=over
+
+=item uri:ftp_typecode(...)
+
+Mutator for the 'type' parameter at the end of the path.  If the optional
+argument is supplied then a new type is set, replacing the existing one, or
+causing the type parameter to be added to the path if it isn't there already.
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("ftp://host/path"))
+    uri:ftp_typecode("a")   -- ftp://host/path;type=a
+    uri:ftp_typecode(nil)   -- ftp://host/path
+
+Passing in an empty string has the same effect as nil, removing the parameter.
+An empty type parameter will be returned as nil, the same as if the parameter
+was missing.
+
+=back
+
+=head1 References
+
+This class is based on L<RFC 1738 section 3.2>.  Unfortunately there isn't
+currently an RFC for FTP URIs based on the more up to date L<RFC 3986>.
+
+=for comment
+vi:ts=4 sw=4 expandtab

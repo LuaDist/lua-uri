@@ -1,0 +1,25 @@
+=head1 Name
+
+lua-uri-telnet - Telnet URI support for Lua URI library
+
+=head1 Description
+
+The class C<uri.telnet> is used for URIs with the C<telnet> scheme.  It
+inherits from the L<uri._login|lua-uri-_login(3)> class.
+
+Telnet URIs are not allowed to have any information in their path part,
+because there isn't any specification defining what it would mean.  An empty
+path or a path of '/' is acceptable, and normalized to '/'.  Any other path
+is considered invalid.
+
+The default port for telnet URIs S<is 23>.
+
+There are no extra methods defined for telnet URIs, only those described in
+L<lua-uri(3)> and L<lua-uri-_login(3)>.
+
+=head1 References
+
+This class is based on L<RFC 4248>.
+
+=for comment
+vi:ts=4 sw=4 expandtab

@@ -1,0 +1,51 @@
+=head1 Name
+
+lua-uri-urn-oid - OID URN support for Lua URI library
+
+=head1 Description
+
+The class C<uri.urn.oid> is used for URNs with the NID 'oid', that is, URIs
+which begin C<urn:oid:>.  It inherits from the L<uri.urn|lua-uri-urn(3)>
+class.
+
+The URI is considered invalid if its NSS doesn't consist only of non-negative
+integers separated by full stop characters.  Numbers with leading zeroes
+are not allowed (although the number '0' on its own is).  There must be at
+least one number.
+
+There is no normalization performed beyound that performed by the C<uri.urn>
+class.
+
+=head1 Methods
+
+All the methods defined in L<lua-uri(3)> and L<lua-uri-urn(3)> as supported, as
+well as the following:
+
+=over
+
+=item uri:oid_numbers(...)
+
+Get or set the OID as an array of Lua number values.
+
+If a new value is provided then it must be a table containing an array of
+at least one number.  All the values in the table must be non-negative
+numbers.  Non-integer numbers are rounded down to an integer value.  Strings
+containing only decimal digits are also allowed.
+
+=for syntax-highlight lua
+
+    local uri = assert(URI:new("urn:oid:1.0.23"))
+    local nums = uri:oid_numbers()
+    for i, v in ipairs(nums) do print(i, v) end
+
+    uri:oid_numbers({ 5, 4, 3, 2, 1 })
+    print(uri)  -- urn:oid:5.4.3.2.1
+
+=back
+
+=head1 References
+
+This implements the 'oid' NID defined in L<RFC 3061>.
+
+=for comment
+vi:ts=4 sw=4 expandtab
